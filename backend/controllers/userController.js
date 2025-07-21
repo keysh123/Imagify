@@ -58,7 +58,12 @@ const userCredits = async (req,res) => {
         if(!user){
              return  res.json({success : false , message : "some error"})
         }
-        return  res.json({success : true , credits : user.creditBalance})
+        return  res.json({success : true , credit : user.creditBalance , user : {
+            name : user.name,
+            email : user.email,
+            id : user._id,
+            creditBalance : user.creditBalance
+        }})
 
 
     }

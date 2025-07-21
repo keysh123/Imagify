@@ -1,14 +1,36 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { assets } from '../assets/assets'
 import { motion } from 'motion/react'
+import { AppContext } from '../context/AppContext'
+import { toast } from 'react-toastify'
 
 const Result = () => {
   const [image,setImage] = useState(assets.sample_img_1)
   const [isImageLoaded , setIsImageLoaded] = useState(false)
   const [loading , setLoading] = useState(false)
   const [input , setInput] = useState('')
+  console.log(image);
+  
+
+  const {generateImage} = useContext(AppContext)
 
   const onSubmitHandler = async  (e) =>{
+    e.preventDefault();
+    setLoading(true);
+    setIsImageLoaded(false);
+    if(!input.trim()) {
+      toast.error("Please enter a prompt to generate an image.");
+      setLoading(false);
+      return;
+    }
+
+    const resultImage = await generateImage(input);
+    if(resultImage) {
+      setImage(resultImage);
+      setIsImageLoaded(true);
+    }
+    setLoading(false);
+    setInput('');
 
   }
   return (
@@ -21,7 +43,7 @@ const Result = () => {
     >
     <div>
       <div className='relative'>
-      <img  src={assets.sample_img_1} alt="" className='max-w-sm rounded'/>
+      <img  src={image} alt="" className='max-w-sm rounded'/>
       <span className={`absolute bottom-0 left-0 h-1 bg-blue-500 ${loading ? 'w-full transition-all duration-[10s]' : 'w-0'} `}></span>
       </div>
        
@@ -44,7 +66,7 @@ const Result = () => {
         }} className='bg-transparent border border-zinc-900 text-black px-8 py-3 rounded-full cursor-pointer'>
           Generate Another
         </p>
-        <a download  className='bg-zinc-900 t px-10 py-3 rounded-full cursor-pointer' href={image}>
+        <a download="download.png"  className='bg-zinc-900 t px-10 py-3 rounded-full cursor-pointer' href={image}>
           Download
         </a>
       </div>

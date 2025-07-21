@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
+import {toast , ToastContainer} from 'react-toastify';
 
 const LogIn = () => {
   const [state, setState] = useState("Sign In");
-  const {showLogin , setShowLogin} = useContext(AppContext)
+  const {showLogin , setShowLogin , backendUrl , setUser ,setToken} = useContext(AppContext)
   useEffect(()=>{
     document.body.style.overflow = 'hidden'
     return ()=>{
@@ -12,10 +13,78 @@ const LogIn = () => {
     }
 
   },[])
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+  });
+  const handleChange = (e) => {
+    setCredentials({
+      ...credentials,
+      [e.target.name]: e.target.value,
+    });
+  }
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    if (state === "Sign In") {
+      console.log("Signing in with", credentials);
+      const response = await fetch(`${backendUrl}/api/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        localStorage.setItem("token", data.token);
+        setShowLogin(false);
+        // window.location.reload();
+        setUser(data.user);
+        setToken(data.token);
+        setShowLogin(false);
+        toast.success("Login successful!")
+      } else {
+        toast.error(data.message || "Login failed. Please try again.");
+      }
+      
+    } 
+    if (state === "Sign Up") {
+      console.log("Signing up with", credentials);
+      // Add sign-up logic here
+      const response = await fetch(`${backendUrl}/api/user/register`, {
+        method: "POST",
+        headers: {  
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: credentials.fullName,
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.success) { 
+        localStorage.setItem("token", data.token);
+        setShowLogin(false);
+        // window.location.reload();
+        setUser(data.user);
+        setToken(data.token);
+        toast.success("Registration successful!")
+      } else {  
+        toast.error(data.message || "Registration failed. Please try again.");
+      }
+    }
+  }
   return (
     <>
       <div className="fixed top-0 left-0 right-0 bottom-0 z-0 backdrop-blur-sm  bg-black/30 flex justify-center items-center">
-        <form className="relative  bg-white p-10 rounded-xl text-slate-500">
+        <form className="relative  bg-white p-10 rounded-xl text-slate-500" onSubmit={handleSubmit}>
           <h1 className="text-center text-2xl text-neutral-700 font-medium">
             {state}
           </h1>
@@ -33,6 +102,9 @@ const LogIn = () => {
                 type="text"
                 placeholder="Full Name"
                 required
+                name="fullName"
+                value={credentials.fullName}
+                onChange={handleChange}
               />
             </div>
           )}
@@ -43,6 +115,9 @@ const LogIn = () => {
               type="email"
               placeholder="Email Id"
               required
+              name="email"
+              value={credentials.email}
+              onChange={handleChange}
             />
           </div>
           <div className="px-4 py-2 border rounded-full mt-4 flex items-center gap-2">
@@ -52,6 +127,9 @@ const LogIn = () => {
               type="password"
               placeholder="Password"
               required
+              name="password"
+              value={credentials.password}
+              onChange={handleChange}
             />
           </div>
           <p className="text-sm text-blue-600 my-4 cursor-pointer">

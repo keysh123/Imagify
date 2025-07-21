@@ -34,6 +34,12 @@ const AppContextProvider = ({ children }) => {
 
   const generateImage = async (prompt) => {
     try {
+      await loadCreditData(); // Ensure credit data is loaded before generating image
+      if (!user || user.creditBalance < 5) {
+        toast.error("You have no credit left. Please buy more credits.");
+        navigate('/buy-credit');
+        return;
+      }
       const response = await fetch(`${backendUrl}/api/image/generate-image`, {
         method: "POST",
         headers: {
@@ -55,10 +61,10 @@ const AppContextProvider = ({ children }) => {
         toast.error(data.message || "Image generation failed. Please try again.");
         console.error("Image generation failed:", data.message);
         loadCreditData(); // Reload credit data in case of failure
-        if(data.creditBalance == 0) {
-          toast.error("You have no credit left. Please buy more credits.");
-          navigate('/buy-credit');
-        }
+        // if(data.creditBalance <5 || credit<5) {
+        //   toast.error("You have no credit left. Please buy more credits.");
+        //   navigate('/buy-credit');
+        // }
       }
    
       return null;

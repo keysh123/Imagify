@@ -15,7 +15,7 @@ const generateImage = async (req, res) => {
       return res.json({ success: false, message: "No user found" });
     }
 
-    if (user.creditBalance <= 0) {
+    if (user.creditBalance < 5) {
       return res.json({
         success: false,
         message: "No credit balance",
@@ -39,13 +39,13 @@ const generateImage = async (req, res) => {
     const resultImage = `data:${contentType};base64,${base64Image}`;
 
     await userModel.findByIdAndUpdate(user._id, {
-      creditBalance: user.creditBalance - 1,
+      creditBalance: user.creditBalance - 5,
     });
 
     return res.json({
       success: true,
       message: "Image generated",
-      creditBalance: user.creditBalance - 1,
+      creditBalance: user.creditBalance - 5,
       resultImage,
     });
   } catch (error) {

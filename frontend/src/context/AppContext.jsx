@@ -80,7 +80,7 @@ const AppContextProvider = ({ children }) => {
     localStorage.removeItem("token");
     setCredit(0);
     setShowLogin(false);
-    window.location.reload();
+    navigate("/");
   };
 
   useEffect(() => {
